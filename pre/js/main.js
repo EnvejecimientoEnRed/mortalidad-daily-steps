@@ -8,6 +8,12 @@ import * as d3 from 'd3';
 import '../css/main.scss';
 
 ///// VISUALIZACIÓN DEL GRÁFICO //////
+let foxSteps = [
+    {pasos: 'Poco (< 3.196 pasos)', ahr: 1},
+    {pasos: 'Medio', ahr: 0.72},
+    {pasos: 'Alto (> 5.170)', ahr: 0.18}
+];
+
 let mauriceSteps = [
     {pasos: 2000, ahr: 1.61},
     {pasos: 4000, ahr: 1},
@@ -28,7 +34,74 @@ mauriceChart();
 
 //Helpers en visualización
 function foxChart() {
+    let chartBlock = d3.select('#viz_fox');
 
+    let width = parseInt(chartBlock.style('width')) - margin.left - margin.right,
+        height = parseInt(chartBlock.style('height')) - margin.top - margin.bottom;
+
+    let chart = chartBlock
+        .append('svg')
+        .lower()
+        .attr('width', width + margin.left + margin.right)
+        .attr('height', height + margin.top + margin.bottom)
+        .append('g')
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    //Eje X
+    let x = d3.scaleBand()
+        .domain(['Poco (< 3.196 pasos)', 'Medio', 'Alto (> 5.170)'])
+        .range([0, width]);
+
+    let xAxis = function(g){
+        g.call(d3.axisBottom(x).ticks(3).tickFormat(function(d) { return d; }))
+        g.call(function(g){
+            g.selectAll('.tick line')
+                .attr('y1', '0%')
+                .attr('y2', '-' + height + '')
+        })
+        g.call(function(g){g.select('.domain').remove()});
+    }
+
+    chart.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis);
+
+    //Eje Y
+    let y = d3.scaleLinear()
+        .domain([0, 2])
+        .range([height,0])
+        .nice();
+    
+    let yAxis = function(svg){
+        svg.call(d3.axisLeft(y).ticks(4).tickFormat(function(d) { return d; }))
+        svg.call(function(g){
+            g.selectAll('.tick line')
+                .attr('class', function(d,i) {
+                    if (d == 1) {
+                        return 'line-special';
+                    }
+                })
+                .attr("x1", '0')
+                .attr("x2", '' + width + '')
+        })
+        svg.call(function(g){g.select('.domain').remove()})
+    }        
+        
+    chart.append("g")
+        .call(yAxis);
+
+    let line = d3.line()
+        .x(d => x(d.pasos) + x.bandwidth() / 2)
+        .y(d => y(+d.ahr))
+        .curve(d3.curveNatural);
+
+    chart.append("path")
+        .data([foxSteps])
+        .attr("class", 'line-chart-1')
+        .attr("fill", "none")
+        .attr("stroke", '#78bb6e')
+        .attr("stroke-width", '2px')
+        .attr("d", line);
 }
 
 function yamamotoChart() {
