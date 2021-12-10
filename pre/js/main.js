@@ -25,7 +25,7 @@ let mauriceSteps = [
     {pasos: 16000, ahr: 0.34}
 ];
 
-let margin = {top: 5, right: 15, bottom: 17.5, left: 25};
+let margin = {top: 7.5, right: 15, bottom: 17.5, left: 25};
 
 foxChart();
 yamamotoChart();
