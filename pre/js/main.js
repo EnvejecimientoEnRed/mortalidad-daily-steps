@@ -509,18 +509,27 @@ function setChartHeight(iframe_fijo) {
     if(iframe_fijo) {
         //El contenedor y el main reciben una altura fija
         //La altura del gráfico se ajusta más a lo disponible en el main, quitando títulos, lógica, ejes y pie de gráfico
-        document.getElementsByClassName('container')[0].style.height = '612px';
-        document.getElementsByClassName('main')[0].style.height = '580px';
-
-        let titleBlock = document.getElementsByClassName('b-title')[0].clientHeight;
-        let logicBlock = document.getElementsByClassName('chart__logics')[0].clientHeight;
-        let footerBlock = document.getElementsByClassName('chart__footer')[0].clientHeight;
-        let footerTop = 8, containerPadding = 8, marginTitle = 8, marginLogics = 12;
-
-        //Comprobar previamente la altura que le demos al MAIN. El estado base es 588 pero podemos hacerlo más o menos alto en función de nuestros intereses
-
-        let height = 580; //Altura total del main
-        document.getElementsByClassName('chart__viz')[0].style.height = height - titleBlock - logicBlock - footerBlock - footerTop - containerPadding - marginTitle - marginLogics + 'px';
+        console.log(document.getElementsByClassName('container')[0].clientWidth);
+        if(document.getElementsByClassName('container')[0].clientWidth > 600){
+            document.getElementsByClassName('container')[0].style.height = '2100px';
+            document.getElementsByClassName('main')[0].style.height = '2068px';
+        } else if (document.getElementsByClassName('container')[0].clientWidth > 500) {
+            document.getElementsByClassName('container')[0].style.height = '2100px';
+            document.getElementsByClassName('main')[0].style.height = '2068px';
+        } else if (document.getElementsByClassName('container')[0].clientWidth > 450) {
+            document.getElementsByClassName('container')[0].style.height = '2150px';
+            document.getElementsByClassName('main')[0].style.height = '2118px';
+        } else if (document.getElementsByClassName('container')[0].clientWidth > 400) {
+            document.getElementsByClassName('container')[0].style.height = '2410px';
+            document.getElementsByClassName('main')[0].style.height = '2378px';
+        } else if (document.getElementsByClassName('container')[0].clientWidth > 360) {
+            document.getElementsByClassName('container')[0].style.height = '2482px';
+            document.getElementsByClassName('main')[0].style.height = '2450px';
+        } else {
+            document.getElementsByClassName('container')[0].style.height = '2582px';
+            document.getElementsByClassName('main')[0].style.height = '2550px';
+        }
+        
     } else {
         document.getElementsByClassName('main')[0].style.height = document.getElementsByClassName('main')[0].clientHeight + 'px';
     }    
