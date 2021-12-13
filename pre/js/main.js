@@ -9,9 +9,23 @@ import '../css/main.scss';
 
 ///// VISUALIZACIÓN DEL GRÁFICO //////
 let foxSteps = [
-    {pasos: 'Poco (< 3.196 pasos)', ahr: 1},
+    {pasos: 'Bajo ((< 3.196 pasos)', ahr: 1},
     {pasos: 'Medio', ahr: 0.72},
-    {pasos: 'Alto (> 5.170)', ahr: 0.18}
+    {pasos: 'Alto ((> 5.170)', ahr: 0.18}
+];
+
+let yamamotoSteps = [
+    {pasos: 'Bajo ((< 4.503 pasos)', ahr: 1},
+    {pasos: 'Medio bajo ((4.503-6.110)', ahr: 0.81},
+    {pasos: 'Medio alto ((6.111-7.971)', ahr: 1.26},
+    {pasos: 'Alto ((>= 7.972)', ahr: 0.46}
+];
+
+let leeSteps = [
+    {pasos: 'Bajo ((+- 2.718 pasos)', ahr: 1},
+    {pasos: 'Medio bajo ((+- 4.363)', ahr: 0.54},
+    {pasos: 'Medio alto ((+- 5.905)', ahr: 0.47},
+    {pasos: 'Alto ((+- 8.442)', ahr: 0.34}
 ];
 
 let mauriceSteps = [
@@ -25,12 +39,37 @@ let mauriceSteps = [
     {pasos: 16000, ahr: 0.34}
 ];
 
-let margin = {top: 7.5, right: 15, bottom: 17.5, left: 25};
+let margin = {top: 7.5, right: 15, bottom: 35, left: 25};
 
 foxChart();
 yamamotoChart();
 leeChart();
 mauriceChart();
+
+function wrap(text, width) {
+    text.each(function() {
+        var text = d3.select(this),
+            words = text.text().split(" (").reverse(),
+            word,
+            line = [],
+            lineNumber = 0,
+            lineHeight = 1,
+            y = 0,
+            dy = words.length <= 3 ? parseFloat(text.attr("dy")) : 0,
+            tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", 0.45 + "em");
+
+        while (word = words.pop()) {
+            line.push(word);
+            tspan.text(line.join(" "));
+            if (tspan.node().getComputedTextLength() > width) {
+                line.pop();
+                tspan.text(line.join(" "));
+                line = [word];
+                tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+            }
+        }
+    });
+};
 
 //Helpers en visualización
 function foxChart() {
@@ -49,7 +88,113 @@ function foxChart() {
 
     //Eje X
     let x = d3.scaleBand()
-        .domain(['Poco (< 3.196 pasos)', 'Medio', 'Alto (> 5.170)'])
+        .domain(['Bajo ((< 3.196 pasos)', 'Medio', 'Alto ((> 5.170)'])
+        .range([0, width]);
+
+    let xAxis = function(g){
+        g.call(d3.axisBottom(x).ticks(3).tickFormat(function(d) {
+            return d;
+        }))
+        g.call(function(g){
+            g.selectAll('.tick line')
+                .attr('y1', '0%')
+                .attr('y2', '-' + height + '')
+        })
+        g.call(function(g){g.select('.domain').remove()});
+    }
+
+    chart.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis)
+        .selectAll('.tick text')
+        .call(wrap, 5);
+
+    //Eje Y
+    let y = d3.scaleLinear()
+        .domain([0, 2])
+        .range([height,0])
+        .nice();
+    
+    let yAxis = function(svg){
+        svg.call(d3.axisLeft(y).ticks(4).tickFormat(function(d) { return d; }))
+        svg.call(function(g){
+            g.selectAll('.tick line')
+                .attr('class', function(d,i) {
+                    if (d == 1) {
+                        return 'line-special';
+                    }
+                })
+                .attr("x1", '0')
+                .attr("x2", '' + width + '')
+        })
+        svg.call(function(g){g.select('.domain').remove()})
+    }        
+        
+    chart.append("g")
+        .call(yAxis);
+
+    //Línea
+    let line = d3.line()
+        .x(d => x(d.pasos) + x.bandwidth() / 2)
+        .y(d => y(+d.ahr))
+        .curve(d3.curveNatural);
+
+    chart.append("path")
+        .data([foxSteps])
+        .attr("class", 'line-chart-1')
+        .attr("fill", "none")
+        .attr("stroke", '#78bb6e')
+        .attr("stroke-width", '2px')
+        .attr("d", line);
+
+    //Círculos
+    chart.selectAll('circles')
+        .data(foxSteps)
+        .enter()
+        .append('circle')
+        .attr('class', 'circle-chart')
+        .attr("r", '3.5')
+        .attr("cx", function(d) { return x(d.pasos) + x.bandwidth() / 2})
+        .attr("cy", function(d) { return y(+d.ahr); })
+        .style("fill", '#78bb6e')
+        .style("stroke", '#78bb6e')
+        .style('opacity', '1');
+
+    //Textos
+    chart.selectAll('.text')
+        .data(foxSteps)
+        .enter()
+        .append('text')
+        .attr("x", function(d) { return x(d.pasos) + x.bandwidth() / 2})
+        .attr("y", function(d) { return y(+d.ahr) - 12.5; })
+        .attr("dy", ".35em")
+        .attr("font-size", '0.85em')
+        .text(function(d) { 
+            if(d.ahr == 1) {
+                return '1 (Referencia)';
+            } else {
+                return d.ahr.toString().replace('.',',')
+            } 
+        });
+}
+
+function yamamotoChart() {
+    let chartBlock = d3.select('#viz_yamamoto');
+
+    let width = parseInt(chartBlock.style('width')) - margin.left - margin.right,
+        height = parseInt(chartBlock.style('height')) - margin.top - margin.bottom;
+
+    let chart = chartBlock
+        .append('svg')
+        .lower()
+        .attr('width', width + margin.left + margin.right)
+        .attr('height', height + margin.top + margin.bottom)
+        .append('g')
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    //Eje X
+    let x = d3.scaleBand()
+        .domain(['Bajo ((< 4.503 pasos)', 'Medio bajo ((4.503-6.110)', 'Medio alto ((6.111-7.971)', 'Alto ((>= 7.972)'])
         .range([0, width]);
 
     let xAxis = function(g){
@@ -64,7 +209,9 @@ function foxChart() {
 
     chart.append("g")
         .attr("transform", "translate(0," + height + ")")
-        .call(xAxis);
+        .call(xAxis)
+        .selectAll('.tick text')
+        .call(wrap, 5);
 
     //Eje Y
     let y = d3.scaleLinear()
@@ -96,20 +243,145 @@ function foxChart() {
         .curve(d3.curveNatural);
 
     chart.append("path")
-        .data([foxSteps])
+        .data([yamamotoSteps])
         .attr("class", 'line-chart-1')
         .attr("fill", "none")
         .attr("stroke", '#78bb6e')
         .attr("stroke-width", '2px')
         .attr("d", line);
-}
 
-function yamamotoChart() {
+    //Círculos
+    chart.selectAll('circles')
+        .data(yamamotoSteps)
+        .enter()
+        .append('circle')
+        .attr('class', 'circle-chart')
+        .attr("r", '3.5')
+        .attr("cx", function(d) { return x(d.pasos) + x.bandwidth() / 2})
+        .attr("cy", function(d) { return y(+d.ahr); })
+        .style("fill", '#78bb6e')
+        .style("stroke", '#78bb6e')
+        .style('opacity', '1');
 
+    //Textos
+    chart.selectAll('.text')
+        .data(yamamotoSteps)
+        .enter()
+        .append('text')
+        .attr("x", function(d) { return x(d.pasos) + x.bandwidth() / 2})
+        .attr("y", function(d) { return y(+d.ahr) - 12.5; })
+        .attr("dy", ".35em")
+        .attr("font-size", '0.85em')
+        .text(function(d) { 
+            if(d.ahr == 1) {
+                return '1 (Referencia)';
+            } else {
+                return d.ahr.toString().replace('.',',')
+            } 
+        });
 }
 
 function leeChart() {
+    let chartBlock = d3.select('#viz_lee');
 
+    let width = parseInt(chartBlock.style('width')) - margin.left - margin.right,
+        height = parseInt(chartBlock.style('height')) - margin.top - margin.bottom;
+
+    let chart = chartBlock
+        .append('svg')
+        .lower()
+        .attr('width', width + margin.left + margin.right)
+        .attr('height', height + margin.top + margin.bottom)
+        .append('g')
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    //Eje X
+    let x = d3.scaleBand()
+        .domain(['Bajo ((+- 2.718 pasos)', 'Medio bajo ((+- 4.363)', 'Medio alto ((+- 5.905)', 'Alto ((+- 8.442)'])
+        .range([0, width]);
+
+    let xAxis = function(g){
+        g.call(d3.axisBottom(x).ticks(3).tickFormat(function(d) { return d; }))
+        g.call(function(g){
+            g.selectAll('.tick line')
+                .attr('y1', '0%')
+                .attr('y2', '-' + height + '')
+        })
+        g.call(function(g){g.select('.domain').remove()});
+    }
+
+    chart.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis)
+        .selectAll('.tick text')
+        .call(wrap, 5);
+
+    //Eje Y
+    let y = d3.scaleLinear()
+        .domain([0, 2])
+        .range([height,0])
+        .nice();
+    
+    let yAxis = function(svg){
+        svg.call(d3.axisLeft(y).ticks(4).tickFormat(function(d) { return d; }))
+        svg.call(function(g){
+            g.selectAll('.tick line')
+                .attr('class', function(d,i) {
+                    if (d == 1) {
+                        return 'line-special';
+                    }
+                })
+                .attr("x1", '0')
+                .attr("x2", '' + width + '')
+        })
+        svg.call(function(g){g.select('.domain').remove()})
+    }        
+        
+    chart.append("g")
+        .call(yAxis);
+
+    let line = d3.line()
+        .x(d => x(d.pasos) + x.bandwidth() / 2)
+        .y(d => y(+d.ahr))
+        .curve(d3.curveNatural);
+
+    chart.append("path")
+        .data([leeSteps])
+        .attr("class", 'line-chart-1')
+        .attr("fill", "none")
+        .attr("stroke", '#78bb6e')
+        .attr("stroke-width", '2px')
+        .attr("d", line);
+
+    //Círculos
+    chart.selectAll('circles')
+        .data(leeSteps)
+        .enter()
+        .append('circle')
+        .attr('class', 'circle-chart')
+        .attr("r", '3.5')
+        .attr("cx", function(d) { return x(d.pasos) + x.bandwidth() / 2})
+        .attr("cy", function(d) { return y(+d.ahr); })
+        .style("fill", '#78bb6e')
+        .style("stroke", '#78bb6e')
+        .style('opacity', '1');
+
+    //Textos
+    chart.selectAll('.text')
+        .data(leeSteps)
+        .enter()
+        .append('text')
+        .attr("x", function(d) { return x(d.pasos) + x.bandwidth() / 2})
+        .attr("y", function(d) { return y(+d.ahr) - 12.5; })
+        .attr("dy", ".35em")
+        .attr("font-size", '0.85em')
+        .text(function(d) { 
+            if(d.ahr == 1) {
+                return '1 (Referencia)';
+            } else {
+                return d.ahr.toString().replace('.',',')
+            } 
+        });
 }
 
 function mauriceChart() {
@@ -185,6 +457,36 @@ function mauriceChart() {
         .attr("stroke", '#78bb6e')
         .attr("stroke-width", '2px')
         .attr("d", line);
+
+    //Círculos
+    chart.selectAll('circles')
+        .data(mauriceSteps)
+        .enter()
+        .append('circle')
+        .attr('class', 'circle-chart')
+        .attr("r", '3.5')
+        .attr("cx", function(d) { return x(d.pasos)})
+        .attr("cy", function(d) { return y(+d.ahr); })
+        .style("fill", '#78bb6e')
+        .style("stroke", '#78bb6e')
+        .style('opacity', '1');
+
+    //Textos
+    chart.selectAll('.text')
+        .data(mauriceSteps)
+        .enter()
+        .append('text')
+        .attr("x", function(d) { return x(+d.pasos)})
+        .attr("y", function(d) { return y(+d.ahr) - 12.5; })
+        .attr("dy", ".35em")
+        .attr("font-size", '0.85em')
+        .text(function(d) { 
+            if(d.ahr == 1) {
+                return '1 (Referencia)';
+            } else {
+                return d.ahr.toString().replace('.',',')
+            } 
+        });
 }
 
 ///// REDES SOCIALES /////

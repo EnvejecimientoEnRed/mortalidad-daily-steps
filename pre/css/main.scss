@@ -117,8 +117,8 @@ body, button {
                 }
                 
                 & .tick line {
-                    stroke: #c3c3c3;
-                    stroke-width: 0.75px;
+                    stroke: #ccc;
+                    stroke-width: 0.5px;
                 }
                 
                 & .line-special {
@@ -388,6 +388,11 @@ body, button {
                             width: 100%;
                             margin-bottom: 6px;
                         }
+                    }
+                }
+                &__viz {
+                    & .tick text {
+                        font-size: 10.5px;
                     }
                 }
             }
