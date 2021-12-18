@@ -23,13 +23,13 @@ let yamamotoSteps = [
 
 let leeSteps = [
     {pasos: 'Bajo ((+- 2.718 pasos)', ahr: 1},
-    {pasos: 'Medio bajo ((+- 4.363)', ahr: 0.54},
-    {pasos: 'Medio alto ((+- 5.905)', ahr: 0.47},
-    {pasos: 'Alto ((+- 8.442)', ahr: 0.34}
+    {pasos: 'Medio bajo ((+- 4.363)', ahr: 0.59},
+    {pasos: 'Medio alto ((+- 5.905)', ahr: 0.54},
+    {pasos: 'Alto ((+- 8.442)', ahr: 0.42}
 ];
 
 let mauriceSteps = [
-    {pasos: 2000, ahr: 1.61},
+    {pasos: 2000, ahr: 1.51},
     {pasos: 4000, ahr: 1},
     {pasos: 6000, ahr: 0.68},
     {pasos: 8000, ahr: 0.49},
@@ -144,7 +144,7 @@ function foxChart() {
         .attr("class", 'line-chart-1')
         .attr("fill", "none")
         .attr("stroke", '#78bb6e')
-        .attr("stroke-width", '2px')
+        .attr("stroke-width", '2.5px')
         .attr("d", line);
 
     //Círculos
@@ -247,7 +247,7 @@ function yamamotoChart() {
         .attr("class", 'line-chart-1')
         .attr("fill", "none")
         .attr("stroke", '#78bb6e')
-        .attr("stroke-width", '2px')
+        .attr("stroke-width", '2.5px')
         .attr("d", line);
 
     //Círculos
@@ -350,7 +350,7 @@ function leeChart() {
         .attr("class", 'line-chart-1')
         .attr("fill", "none")
         .attr("stroke", '#78bb6e')
-        .attr("stroke-width", '2px')
+        .attr("stroke-width", '2.5px')
         .attr("d", line);
 
     //Círculos
@@ -455,7 +455,7 @@ function mauriceChart() {
         .attr("class", 'line-chart-1')
         .attr("fill", "none")
         .attr("stroke", '#78bb6e')
-        .attr("stroke-width", '2px')
+        .attr("stroke-width", '2.5px')
         .attr("d", line);
 
     //Círculos
