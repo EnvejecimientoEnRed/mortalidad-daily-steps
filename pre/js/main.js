@@ -45,6 +45,9 @@ foxChart();
 yamamotoChart();
 leeChart();
 mauriceChart();
+setTimeout(() => {
+    setChartCanvas()
+}, 4000);
 
 function wrap(text, width) {
     text.each(function() {
@@ -509,7 +512,6 @@ function setChartHeight(iframe_fijo) {
     if(iframe_fijo) {
         //El contenedor y el main reciben una altura fija
         //La altura del gráfico se ajusta más a lo disponible en el main, quitando títulos, lógica, ejes y pie de gráfico
-        console.log(document.getElementsByClassName('container')[0].clientWidth);
         if(document.getElementsByClassName('container')[0].clientWidth > 600){
             document.getElementsByClassName('container')[0].style.height = '2100px';
             document.getElementsByClassName('main')[0].style.height = '2068px';
@@ -550,7 +552,7 @@ function setChartCanvasImage() {
     // Create a link
     var aDownloadLink = document.createElement('a');
     // Add the name of the file to the link
-    aDownloadLink.download = 'longevidad_edv_saludable.png';
+    aDownloadLink.download = 'mortalidad_daily_steps.png';
     // Attach the data to the link
     aDownloadLink.href = image;
     // Get the code to click the download link
